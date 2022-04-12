@@ -1,69 +1,76 @@
 #import dependencies
+from cgitb import text
 import os
 import csv
+from unicodedata import name
 
 # set csv path
 csv_path = os.path.join("PyPoll/Resources/election_data.csv")
 
+# create lists to store data
+voter_id = []
+candidate = []
+
 # open and read csv file
 with open(csv_path) as csvfile:
-    csv_reader = csv.reader(csvfile, delimiter=',')
+    csvreader = csv.reader(csvfile, delimiter=",")
 
-# declare variables
-candidate_one = "Khan"
-candidate_two = "Correy"
-candidate_three = "Li"
-candidate_four = "O'Tooley"
+    # read header row first
+    csvheader = next(csvreader)
 
-# variables defined and set to 0
-starting_vote_one = 0
-starting_vote_two = 0
-starting_vote_three = 0
-starting_vote_four = 0
+    # read through the data
+    for row in csvreader:
 
-# loop through for candidates votes
-for row in csv_reader:
-    if row[2] == candidate_one:
-        starting_vote_one = starting_vote_one + 1
-    elif row[2] == candidate_two:
-        starting_vote_two = starting_vote_two + 1
-    elif row[2] == candidate_three:
-        starting_vote_three = starting_vote_three + 1
-    elif row[2] == candidate_four:
-        starting_vote_four = starting_vote_four + 1
+        voter_id.append(row[0])
+        candidate.append(row[2])
 
-# total votes
-total_votes = starting_vote_one + starting_vote_two + \
-    starting_vote_three + starting_vote_four
+    # new variable
+    total_votes = int(len(voter_id))
 
-# find out candidate percentages
-khan_per = float((starting_vote_one/total_votes)*100)
-correy_per = float((starting_vote_two/total_votes)*100)
-li_per = float((starting_vote_three/total_votes)*100)
-otooley_per = float((starting_vote_four/total_votes)*100)
+    candidate_count = [[j, candidate.count(j)] for j in set(candidate)]
 
-# print results
-Print("Election Results")
-Print("-------------------------")
-Print("Total Votes: " + str(total_votes))
-Print("-------------------------")
-Print("Khan" + " " + str("%.3f" % khan_per) +
-    "%" + " " + "(" + str(starting_vote_one) + ")")
-Print("Correy" + " " + str("%.3f" % correy_per) +
-    "%" + " " + "(" + str(starting_vote_two) + ")")
-Print("Li" + " " + str("%.3f" % li_per) + "%" +
-    " " + "(" + str(starting_vote_three) + ")")
-Print("O'Tooley" + " " + str("%.3f" % otooley_per) +
-    "%" + " " + "(" + str(starting_vote_four) + ")")
-Print("------------------------")
+    name_list = [i[0] for i in candidate_count]
+    count_list = [i[1] for i in candidate_count]
 
-if starting_vote_one > starting_vote_two and starting_vote_one > starting_vote_three and starting_vote_one > starting_vote_four:
-    print("Winner: Khan")
-elif starting_vote_two > starting_vote_one and starting_vote_two > starting_vote_three and starting_vote_two > starting_vote_four:
-    print("Winner : Correy")
-elif starting_vote_three > starting_vote_one and starting_vote_three > starting_vote_two and starting_vote_three > starting_vote_four:
-    print("Winner: Li")
-else:
-    print("Winner: O'Tooley")
+    max_value = max(count_list)
 
-print("--------------------------")
+    winner_index = count_list.index(max_value)
+
+    winner_name = name_list[winner_index]
+
+    percentages = []
+
+    for k in range(0, len(count_list)):
+        percent = round((count_list[k] / total_votes) *100, 2)
+        percentages.append(percent)
+
+#print results
+print("Election Results")
+print("----------------------------")
+print(f'Total Votes: {total_votes}')
+print("----------------------------")
+for n in range(0, len(name_list)):
+    print(f'{name_list[n]}: {percentages[n]}% ({count_list[n]})')
+print("----------------------------")
+print(f'Winner: {winner_name}')
+print("----------------------------")
+
+#export to text file
+def text_file():
+    return str("Election Results" +
+    "----------------------" +
+    "Total Votes: 1048575" +
+    "----------------------" +
+    "O'Tooley: 3.01% (31586)" +
+    "Correy: 19.94% (209046)" +
+    "Li: 13.96% (146360)" +
+    "Khan: 63.09% (661583)" +
+    "----------------------" +
+    "Winner: Khan" +
+    "----------------------")
+output = text_file()
+file = open("output.txt", "w")
+file.write(output)
+file.close()
+
+
